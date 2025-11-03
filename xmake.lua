@@ -1,8 +1,15 @@
 add_rules("mode.debug", "mode.release")
+add_requires("fmt")
+
+set_languages("c++20")
+set_encodings("utf-8")
 
 target("LittleShell")
     set_kind("binary")
-    add_files("src/*.cpp")
+    add_packages("fmt")
+    add_files("src/**.cpp")
+    add_headerfiles("inc/**.hpp")
+    add_headerfiles("inc/**.inl")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
