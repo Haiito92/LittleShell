@@ -1,15 +1,24 @@
 #include <iostream>
+
+#include "LittleShell.hpp"
 #include "fmt/format.h"
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
 
-    bool isRunning = true;
-    while (isRunning)
+    try
     {
-        fmt::print("LittleShell>");
-        std::string input;
-        std::getline(std::cin, input);
+        Ls::LittleShell shell;
+        shell.Run();
+    }
+    catch (const std::exception& e)
+    {
+        fmt::print("Catched standard exception:\n{}\n", e.what());    
+    }
+    catch (...)
+    {
+        fmt::print("Catched unknown exception\n");
     }
     
     return 0;
