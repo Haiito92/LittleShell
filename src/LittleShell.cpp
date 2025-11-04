@@ -17,10 +17,10 @@ namespace Ls
 
     void LittleShell::Run()
     {
-        fmt::print("Welcome to LittleShell !\n");
+        fmt::print("Welcome to LittleShell!\n");
         
-        bool isRunning = true;
-        while (isRunning)
+        m_isRunning = true;
+        while (m_isRunning)
         {
             // Print location
             fmt::print("LS {}> ", m_currentPath.string());
@@ -44,12 +44,13 @@ namespace Ls
             ProcessExternalCommand(input);
         }
 
-        fmt::print("Exiting LittleShell !\n");
+        fmt::print("Thank you for using LittleShell!\nBye bye! :D\n");
     }
 
     void LittleShell::BindBuiltInCommands()
     {
         BindBuiltInCommand("cd", this, &LittleShell::ChangeDirectory);
+        BindBuiltInCommand("exit", this, &LittleShell::ExitShell);
     }
 
     std::vector<std::string> LittleShell::DeconstructUserInput(const std::string& input) const
@@ -96,6 +97,12 @@ namespace Ls
             return false;
         }
         
+        return true;
+    }
+
+    bool LittleShell::ExitShell(const std::vector<std::string>& arguments)
+    {
+        m_isRunning = false;
         return true;
     }
 

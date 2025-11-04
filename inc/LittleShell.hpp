@@ -33,11 +33,13 @@ namespace Ls
 
         bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
         bool ChangeDirectory(const std::vector<std::string>& arguments);
+        bool ExitShell(const std::vector<std::string>& arguments);
 
         bool ProcessExternalCommand(const std::string& input) const;
         
         std::filesystem::path m_currentPath;
         std::unordered_map<std::string, BuiltInCommandLambda> m_builtInCommands;
+        bool m_isRunning = false;
     };
 }
 
