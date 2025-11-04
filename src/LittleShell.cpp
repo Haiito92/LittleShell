@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fmt/base.h>
+#include <windows.h>
 
 namespace Ls
 {
@@ -22,13 +23,16 @@ namespace Ls
         while (isRunning)
         {
             // Print location
-            fmt::print("LS {}>", m_currentPath.string());
+            fmt::print("LS {}> ", m_currentPath.string());
 
-            // Get Tokens from user input - GetTokensFromUserInput calls getline so it blocks the program,
-            // waiting for the user to press enter 
-            std::vector<std::string> tokens = GetUserInput();
+            //Get user input
+            std::string input;
+            std::getline(std::cin, input);
 
-            if (tokens.empty()) continue;
+            if (input.empty()) continue;
+            
+            // Deconstruct into tokens for built-ins
+            std::vector<std::string> tokens = DeconstructUserInput(input);
 
             std::string commandToken = tokens[0];
             std::vector<std::string> arguments = std::vector<std::string>(tokens.begin() + 1, tokens.end());
@@ -36,8 +40,8 @@ namespace Ls
             // Process built in command
             if (ProcessBuiltInCommand(commandToken, arguments)) continue;
 
-            // Process external command
-            
+            // Process external command (not using return right now)
+            ProcessExternalCommand(input);
         }
 
         fmt::print("Exiting LittleShell !\n");
@@ -48,11 +52,8 @@ namespace Ls
         BindBuiltInCommand("cd", this, &LittleShell::ChangeDirectory);
     }
 
-    std::vector<std::string> LittleShell::GetUserInput() const
+    std::vector<std::string> LittleShell::DeconstructUserInput(const std::string& input) const
     {
-        std::string input;
-        std::getline(std::cin, input);
-
         std::istringstream iss(input);
         std::string token;
         std::vector<std::string> tokens;
@@ -81,11 +82,6 @@ namespace Ls
         return false;
     }
 
-    bool LittleShell::ProcessExternalCommand(const std::string& commandToken, const std::vector<std::string>& arguments) const
-    {
-        return true;
-    }
-
     bool LittleShell::ChangeDirectory(const std::vector<std::string>& arguments)
     {
         if (arguments.empty()) return false;
@@ -99,6 +95,52 @@ namespace Ls
         {
             return false;
         }
+        
+        return true;
+    }
+
+    bool LittleShell::ProcessExternalCommand(const std::string& input) const
+    {
+        // Setup for Windows process creation
+        STARTUPINFOA startupInfo;
+        PROCESS_INFORMATION processInfo;
+
+        ZeroMemory(&startupInfo, sizeof(startupInfo));
+        startupInfo.cb = sizeof(startupInfo);
+        ZeroMemory(&processInfo, sizeof(processInfo));
+
+        std::vector<char> commandLine(input.begin(), input.end());
+        commandLine.push_back('\0');
+        
+        // Create process
+        // Create the process
+        if (!CreateProcessA(
+                NULL,                 // Application name
+                commandLine.data(),   // Command line
+                NULL,                 // Process handle not inheritable
+                NULL,                 // Thread handle not inheritable
+                FALSE,                // Set handle inheritance to FALSE
+                0,                    // No creation flags
+                NULL,                 // Use parent's environment block
+                NULL,                 // Use parent's starting directory
+                &startupInfo,         // Pointer to STARTUPINFO structure
+                &processInfo)         // Pointer to PROCESS_INFORMATION structure
+        )
+        {
+            return false;
+        }
+
+        // Wait until the process exits
+        WaitForSingleObject(processInfo.hProcess, INFINITE);
+
+        // Get exit code
+        DWORD exitCode;
+        GetExitCodeProcess(processInfo.hProcess, &exitCode);
+        // We maybe should do something with the exit code, a print ?
+
+        // Close process and thread handles
+        CloseHandle(processInfo.hProcess);
+        CloseHandle(processInfo.hThread);
         
         return true;
     }
