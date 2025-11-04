@@ -33,6 +33,7 @@ namespace Ls
 
         bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
         bool ChangeDirectory(const std::vector<std::string>& arguments);
+        bool ListFiles(const std::vector<std::string>& arguments);
         bool ExitShell(const std::vector<std::string>& arguments);
 
         bool ProcessExternalCommand(const std::string& input) const;

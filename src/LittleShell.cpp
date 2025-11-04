@@ -17,7 +17,9 @@ namespace Ls
 
     void LittleShell::Run()
     {
-        fmt::print("Welcome to LittleShell!\n");
+        fmt::print("\nWelcome to LittleShell!\n"
+                   "Made by: Antoine Hanna - Haiito92\n"
+                   "https://github.com/Haiito92\n\n");
         
         m_isRunning = true;
         while (m_isRunning)
@@ -47,12 +49,13 @@ namespace Ls
             ProcessExternalCommand(input);
         }
 
-        fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n");
+        fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n\n");
     }
 
     void LittleShell::BindBuiltInCommands()
     {
         BindBuiltInCommand("cd", this, &LittleShell::ChangeDirectory);
+        BindBuiltInCommand("ls", this, &LittleShell::ListFiles);
         BindBuiltInCommand("exit", this, &LittleShell::ExitShell);
     }
 
@@ -100,6 +103,47 @@ namespace Ls
             return false;
         }
         
+        return true;
+    }
+
+    bool LittleShell::ListFiles(const std::vector<std::string>& arguments)
+    {
+        try
+        {
+            std::vector<std::string> directories;
+            std::vector<std::string> files;
+            std::vector<std::string> others;
+            std::string path = arguments.empty() ? "." : arguments[0];
+                
+            fmt::print("\n");
+            for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
+            {
+                std::string fileName = entry.path().filename().string();
+                if (entry.is_directory())
+                    directories.push_back(fileName);
+                else if (entry.is_regular_file())
+                    files.push_back(fileName);
+                else
+                    others.push_back(fileName);
+            }
+
+            auto printEntries = [](const std::vector<std::string>& fileNames, const std::string& suffix = "") {
+                for (const std::string& fileName : fileNames)
+                    fmt::print("{}{}\n", fileName, suffix);
+            };
+            
+            printEntries(directories, "/");
+            printEntries(files);
+            printEntries(others);
+            
+            fmt::print("\n");
+        }
+        catch (...)
+        {
+            // TODO Better error handling
+            return false;
+        }
+
         return true;
     }
 

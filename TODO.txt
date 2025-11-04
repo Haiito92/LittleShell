@@ -1,1 +1,2 @@
-- Make so if we Ctrl+C, there is no line appearing after it
+- Better error handling in commands and external calls
+- Show error message when couldn't process as built-in or external
