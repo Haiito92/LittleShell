@@ -27,7 +27,11 @@ namespace Ls
 
             //Get user input
             std::string input;
-            std::getline(std::cin, input);
+            if (!std::getline(std::cin, input))
+            {
+                m_isRunning = false;
+                break;
+            }
 
             if (input.empty()) continue;
             
@@ -44,7 +48,7 @@ namespace Ls
             ProcessExternalCommand(input);
         }
 
-        fmt::print("Thank you for using LittleShell!\nBye bye! :D\n");
+        fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n");
     }
 
     void LittleShell::BindBuiltInCommands()
