@@ -1,9 +1,16 @@
 #pragma once
+#include <filesystem>
+#include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace Ls
 {
+    template<typename T>
+    using BuiltInCommandMethod = bool(T::*)(const std::vector<std::string>&);
+    using BuiltInCommandLambda = std::function<bool(const std::vector<std::string>&)>;
+    
     class LittleShell
     {
     public:
@@ -17,12 +24,23 @@ namespace Ls
 
         void Run();
 
-        bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
-        bool ProcessExternalCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
-
     private:
+        void BindBuiltInCommands();
+        template<typename T>
+        void BindBuiltInCommand(const std::string& commandName, T* object, BuiltInCommandMethod<T> method);
         
+        std::vector<std::string> GetUserInput() const;
+
+        bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
+        bool ProcessExternalCommand(const std::string& commandToken, const std::vector<std::string>& arguments) const;
+
+        bool ChangeDirectory(const std::vector<std::string>& arguments);
+        
+        std::filesystem::path m_currentPath;
+        std::unordered_map<std::string, BuiltInCommandLambda> m_builtInCommands;
     };
 }
+
+#include "LittleShell.inl"
 
 
