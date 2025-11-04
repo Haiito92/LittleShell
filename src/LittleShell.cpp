@@ -29,7 +29,6 @@ namespace Ls
             std::string input;
             if (!std::getline(std::cin, input))
             {
-                m_isRunning = false;
                 break;
             }
 
