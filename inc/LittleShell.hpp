@@ -4,13 +4,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "BuiltInCommands/BuiltInCommand.hpp"
 
 namespace Ls
 {
-    template<typename T>
-    using BuiltInCommandMethod = bool(T::*)(const std::vector<std::string>&);
-    using BuiltInCommandLambda = std::function<bool(const std::vector<std::string>&)>;
-    
+    class BuiltInCommand;
     class LittleShell
     {
     public:
@@ -23,27 +21,21 @@ namespace Ls
         LittleShell& operator=(LittleShell&& other) = delete;
 
         void Run();
+        
+        void SetCurrentPath(std::string newPath);
+        void SetIsRunning(bool newValue);
 
     private:
-        void BindBuiltInCommands();
-        template<typename T>
-        void BindBuiltInCommand(const std::string& commandName, T* object, BuiltInCommandMethod<T> method);
         
         std::vector<std::string> DeconstructUserInput(const std::string& input) const;
 
         bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
-        bool ChangeDirectory(const std::vector<std::string>& arguments);
-        bool ListFiles(const std::vector<std::string>& arguments);
-        bool ExitShell(const std::vector<std::string>& arguments);
-
         bool ProcessExternalCommand(const std::string& input) const;
         
-        std::filesystem::path m_currentPath;
-        std::unordered_map<std::string, BuiltInCommandLambda> m_builtInCommands;
+        std::string m_currentPath;
+        std::unordered_map<std::string, std::unique_ptr<BuiltInCommand>> m_builtInCommands;
         bool m_isRunning = false;
     };
 }
-
-#include "LittleShell.inl"
 
 

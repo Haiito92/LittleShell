@@ -1,18 +1,22 @@
 #include "LittleShell.hpp"
-
 #include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <fmt/base.h>
 #include <windows.h>
+#include "BuiltInCommands/ChangeDirectoryCommand.hpp"
+#include "BuiltInCommands/ExitShellCommand.hpp"
+#include "BuiltInCommands/ListFilesCommand.hpp"
 
 namespace Ls
 {
     LittleShell::LittleShell():
-    m_currentPath(std::filesystem::current_path()),
+    m_currentPath(std::filesystem::current_path().string()),
     m_builtInCommands()
     {
-        BindBuiltInCommands();
+        m_builtInCommands["cd"] = std::move(std::make_unique<ChangeDirectoryCommand>(*this));
+        m_builtInCommands["ls"] = std::move(std::make_unique<ListFilesCommand>(*this));
+        m_builtInCommands["exit"] = std::move(std::make_unique<ExitShellCommand>(*this));
     }
 
     void LittleShell::Run()
@@ -25,7 +29,7 @@ namespace Ls
         while (m_isRunning)
         {
             // Print location
-            fmt::print("LS {}> ", m_currentPath.string());
+            fmt::print("LS {}> ", m_currentPath);
 
             //Get user input
             std::string input;
@@ -52,11 +56,14 @@ namespace Ls
         fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n\n");
     }
 
-    void LittleShell::BindBuiltInCommands()
+    void LittleShell::SetCurrentPath(std::string newPath)
     {
-        BindBuiltInCommand("cd", this, &LittleShell::ChangeDirectory);
-        BindBuiltInCommand("ls", this, &LittleShell::ListFiles);
-        BindBuiltInCommand("exit", this, &LittleShell::ExitShell);
+        m_currentPath = std::move(newPath);
+    }
+
+    void LittleShell::SetIsRunning(bool newValue)
+    {
+        m_isRunning = newValue;
     }
 
     std::vector<std::string> LittleShell::DeconstructUserInput(const std::string& input) const
@@ -81,76 +88,12 @@ namespace Ls
             if (command.first == commandToken)
             {
                 // Right now we don't do anything with the return of the command
-                command.second(arguments);
+                command.second->Execute(arguments);
                 return true; // We return true because we were able to call a built-in command, it's result doesn't matter.
             }
         }
         
         return false;
-    }
-
-    bool LittleShell::ChangeDirectory(const std::vector<std::string>& arguments)
-    {
-        if (arguments.empty()) return false;
-
-        try
-        {
-            std::filesystem::current_path(arguments[0]);
-            m_currentPath = std::filesystem::current_path(); 
-        }
-        catch (...)
-        {
-            return false;
-        }
-        
-        return true;
-    }
-
-    bool LittleShell::ListFiles(const std::vector<std::string>& arguments)
-    {
-        try
-        {
-            std::vector<std::string> directories;
-            std::vector<std::string> files;
-            std::vector<std::string> others;
-            std::string path = arguments.empty() ? "." : arguments[0];
-                
-            fmt::print("\n");
-            for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
-            {
-                std::string fileName = entry.path().filename().string();
-                if (entry.is_directory())
-                    directories.push_back(fileName);
-                else if (entry.is_regular_file())
-                    files.push_back(fileName);
-                else
-                    others.push_back(fileName);
-            }
-
-            auto printEntries = [](const std::vector<std::string>& fileNames, const std::string& suffix = "") {
-                for (const std::string& fileName : fileNames)
-                    fmt::print("{}{}\n", fileName, suffix);
-            };
-            
-            printEntries(directories, "/");
-            printEntries(files);
-            printEntries(others);
-            
-            fmt::print("\n");
-        }
-        catch (...)
-        {
-            // TODO Better error handling
-            return false;
-        }
-
-        return true;
-    }
-
-    bool LittleShell::ExitShell(const std::vector<std::string>& arguments)
-    {
-        m_isRunning = false;
-        return true;
     }
 
     bool LittleShell::ProcessExternalCommand(const std::string& input) const
