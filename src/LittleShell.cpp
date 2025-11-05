@@ -47,10 +47,10 @@ namespace Ls
             std::string commandToken = tokens[0];
             std::vector<std::string> arguments = std::vector<std::string>(tokens.begin() + 1, tokens.end());
             
-            // Process built in command
+            // Try execute built in command - if found one, continue
             if (m_builtInCommandExecutor.ExecuteBuiltInCommand(commandToken, arguments)) continue;
 
-            // Process external command
+            // Try execute external command - if found one, continue
             if (m_ExternalCommandExecutor.ExecuteExternalCommand(input)) continue;
 
             // Else: show error or debug in the terminal
