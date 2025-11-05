@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <fmt/base.h>
-#include <windows.h>
 #include "BuiltInCommands/ChangeDirectoryCommand.hpp"
 #include "BuiltInCommands/ExitShellCommand.hpp"
 #include "BuiltInCommands/ListFilesCommand.hpp"
@@ -13,6 +12,7 @@ namespace Ls
     LittleShell::LittleShell():
     m_currentPath(std::filesystem::current_path().string()),
     m_builtInCommandExecutor(),
+    m_ExternalCommandExecutor(),
     m_isRunning(false)
     {
         m_builtInCommandExecutor.RegisterBuiltInCommand("cd", std::make_unique<ChangeDirectoryCommand>(*this));
@@ -51,7 +51,7 @@ namespace Ls
             if (m_builtInCommandExecutor.ExecuteBuiltInCommand(commandToken, arguments)) continue;
 
             // Process external command
-            if (ProcessExternalCommand(input)) continue;
+            if (m_ExternalCommandExecutor.ExecuteExternalCommand(input)) continue;
 
             // Else: show error or debug in the terminal
         }
@@ -81,51 +81,5 @@ namespace Ls
         }
 
         return tokens;
-    }
-
-    bool LittleShell::ProcessExternalCommand(const std::string& input) const
-    {
-        // Setup for Windows process creation
-        STARTUPINFOA startupInfo;
-        PROCESS_INFORMATION processInfo;
-
-        ZeroMemory(&startupInfo, sizeof(startupInfo));
-        startupInfo.cb = sizeof(startupInfo);
-        ZeroMemory(&processInfo, sizeof(processInfo));
-
-        std::vector<char> commandLine(input.begin(), input.end());
-        commandLine.push_back('\0');
-        
-        // Create process
-        // Create the process
-        if (!CreateProcessA(
-                NULL,                 // Application name
-                commandLine.data(),   // Command line
-                NULL,                 // Process handle not inheritable
-                NULL,                 // Thread handle not inheritable
-                FALSE,                // Set handle inheritance to FALSE
-                0,                    // No creation flags
-                NULL,                 // Use parent's environment block
-                NULL,                 // Use parent's starting directory
-                &startupInfo,         // Pointer to STARTUPINFO structure
-                &processInfo)         // Pointer to PROCESS_INFORMATION structure
-        )
-        {
-            return false;
-        }
-
-        // Wait until the process exits
-        WaitForSingleObject(processInfo.hProcess, INFINITE);
-
-        // Get exit code
-        DWORD exitCode;
-        GetExitCodeProcess(processInfo.hProcess, &exitCode);
-        // We maybe should do something with the exit code, a print ?
-
-        // Close process and thread handles
-        CloseHandle(processInfo.hProcess);
-        CloseHandle(processInfo.hThread);
-        
-        return true;
     }
 }

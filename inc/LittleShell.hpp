@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "BuiltInCommandExecutor.hpp"
+#include "ExternalCommandExecutor.hpp"
 #include "BuiltInCommands/BuiltInCommand.hpp"
 
 namespace Ls
@@ -28,12 +29,11 @@ namespace Ls
         void SetIsRunning(bool newValue);
 
     private:
-        
         std::vector<std::string> DeconstructUserInput(const std::string& input) const;
-        bool ProcessExternalCommand(const std::string& input) const;
         
         std::string m_currentPath;
         BuiltInCommandExecutor m_builtInCommandExecutor;
+        ExternalCommandExecutor m_ExternalCommandExecutor;
         bool m_isRunning;
     };
 }
