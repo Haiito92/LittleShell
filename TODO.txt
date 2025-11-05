@@ -1,3 +1,5 @@
+- Create Changelog
+
 - Create UserInputParser
 - Better error handling in commands and external calls
 - Show error message when couldn't process as built-in or external
