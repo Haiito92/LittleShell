@@ -12,11 +12,12 @@ namespace Ls
 {
     LittleShell::LittleShell():
     m_currentPath(std::filesystem::current_path().string()),
-    m_builtInCommands()
+    m_builtInCommandExecutor(),
+    m_isRunning(false)
     {
-        m_builtInCommands["cd"] = std::move(std::make_unique<ChangeDirectoryCommand>(*this));
-        m_builtInCommands["ls"] = std::move(std::make_unique<ListFilesCommand>(*this));
-        m_builtInCommands["exit"] = std::move(std::make_unique<ExitShellCommand>(*this));
+        m_builtInCommandExecutor.RegisterBuiltInCommand("cd", std::make_unique<ChangeDirectoryCommand>(*this));
+        m_builtInCommandExecutor.RegisterBuiltInCommand("ls", std::make_unique<ListFilesCommand>(*this));
+        m_builtInCommandExecutor.RegisterBuiltInCommand("exit", std::make_unique<ExitShellCommand>(*this));
     }
 
     void LittleShell::Run()
@@ -47,10 +48,12 @@ namespace Ls
             std::vector<std::string> arguments = std::vector<std::string>(tokens.begin() + 1, tokens.end());
             
             // Process built in command
-            if (ProcessBuiltInCommand(commandToken, arguments)) continue;
+            if (m_builtInCommandExecutor.ExecuteBuiltInCommand(commandToken, arguments)) continue;
 
-            // Process external command (not using return right now)
-            ProcessExternalCommand(input);
+            // Process external command
+            if (ProcessExternalCommand(input)) continue;
+
+            // Else: show error or debug in the terminal
         }
 
         fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n\n");
@@ -78,22 +81,6 @@ namespace Ls
         }
 
         return tokens;
-    }
-
-    
-    bool LittleShell::ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments)
-    {
-        for (const auto& command : m_builtInCommands)
-        {
-            if (command.first == commandToken)
-            {
-                // Right now we don't do anything with the return of the command
-                command.second->Execute(arguments);
-                return true; // We return true because we were able to call a built-in command, it's result doesn't matter.
-            }
-        }
-        
-        return false;
     }
 
     bool LittleShell::ProcessExternalCommand(const std::string& input) const

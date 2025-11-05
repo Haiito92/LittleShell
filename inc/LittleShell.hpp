@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "BuiltInCommandExecutor.hpp"
 #include "BuiltInCommands/BuiltInCommand.hpp"
 
 namespace Ls
@@ -28,13 +30,11 @@ namespace Ls
     private:
         
         std::vector<std::string> DeconstructUserInput(const std::string& input) const;
-
-        bool ProcessBuiltInCommand(const std::string& commandToken, const std::vector<std::string>& arguments);
         bool ProcessExternalCommand(const std::string& input) const;
         
         std::string m_currentPath;
-        std::unordered_map<std::string, std::unique_ptr<BuiltInCommand>> m_builtInCommands;
-        bool m_isRunning = false;
+        BuiltInCommandExecutor m_builtInCommandExecutor;
+        bool m_isRunning;
     };
 }
 
