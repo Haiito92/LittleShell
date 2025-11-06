@@ -1,6 +1,9 @@
 #include "BuiltInCommands/ListFilesCommand.hpp"
 #include <fmt/base.h>
+#include <fmt/format.h>
+
 #include "LittleShell.hpp"
+#include "Log.hpp"
 
 namespace Ls
 {
@@ -17,7 +20,6 @@ namespace Ls
             std::vector<std::string> others;
             std::string path = arguments.empty() ? "." : arguments[0];
                 
-            fmt::print("\n");
             for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
             {
                 std::string fileName = entry.path().filename().string();
@@ -29,6 +31,7 @@ namespace Ls
                     others.push_back(fileName);
             }
 
+            fmt::print("\n");
             auto printEntries = [](const std::vector<std::string>& fileNames, const std::string& suffix = "") {
                 for (const std::string& fileName : fileNames)
                     fmt::print("{}{}\n", fileName, suffix);
@@ -40,9 +43,14 @@ namespace Ls
             
             fmt::print("\n");
         }
+        catch (const std::exception& e)
+        {
+            Log::LogError(fmt::format("List Files command failed:\n {}\n", e.what()));
+            return false;
+        }
         catch (...)
         {
-            // TODO Better error handling
+            Log::LogError("List Files command failed:\n Unknown exception.\n");
             return false;
         }
 

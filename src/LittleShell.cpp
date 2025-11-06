@@ -56,7 +56,7 @@ namespace Ls
             if (m_externalCommandExecutor.ExecuteExternalCommand(input)) continue;
 
             // Else: show error or debug in the terminal
-            Log::LogError("Didn't find a built-in or external command matching the input.");
+            Log::LogError("Didn't find a built-in or external command matching the input.\n");
         }
 
         fmt::print("\nThank you for using LittleShell!\nBye bye! :D\n\n");

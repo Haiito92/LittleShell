@@ -20,14 +20,14 @@ namespace Ls
             std::filesystem::current_path(arguments[0]);
             m_shell.SetCurrentPath(std::filesystem::current_path().string()); 
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
-            Log::LogError(fmt::format("Change Directory command failed:\n {}", e.what()));
+            Log::LogError(fmt::format("Change Directory command failed:\n {}\n", e.what()));
             return false;
         }
         catch (...)
         {
-            Log::LogError("Change Directory command failed:\n Unknown exception.");
+            Log::LogError("Change Directory command failed:\n Unknown exception.\n");
             return false;
         }
         
