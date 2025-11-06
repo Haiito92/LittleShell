@@ -12,7 +12,7 @@ namespace Ls
     LittleShell::LittleShell():
     m_currentPath(std::filesystem::current_path().string()),
     m_builtInCommandExecutor(),
-    m_ExternalCommandExecutor(),
+    m_externalCommandExecutor(),
     m_isRunning(false)
     {
         m_builtInCommandExecutor.RegisterBuiltInCommand("cd", std::make_unique<ChangeDirectoryCommand>(*this));
@@ -51,7 +51,7 @@ namespace Ls
             if (m_builtInCommandExecutor.ExecuteBuiltInCommand(commandToken, arguments)) continue;
 
             // Try execute external command - if found one, continue
-            if (m_ExternalCommandExecutor.ExecuteExternalCommand(input)) continue;
+            if (m_externalCommandExecutor.ExecuteExternalCommand(input)) continue;
 
             // Else: show error or debug in the terminal
         }

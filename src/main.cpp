@@ -14,11 +14,11 @@ int main(int argc, char** argv)
     }
     catch (const std::exception& e)
     {
-        fmt::print("Catched standard exception:\n{}\n", e.what());    
+        fmt::print("Caught standard exception:\n{}\n", e.what());    
     }
     catch (...)
     {
-        fmt::print("Catched unknown exception\n");
+        fmt::print("Caught unknown exception\n");
     }
     
     return 0;

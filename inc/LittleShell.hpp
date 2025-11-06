@@ -33,7 +33,7 @@ namespace Ls
         
         std::string m_currentPath;
         BuiltInCommandExecutor m_builtInCommandExecutor;
-        ExternalCommandExecutor m_ExternalCommandExecutor;
+        ExternalCommandExecutor m_externalCommandExecutor;
         bool m_isRunning;
     };
 }
